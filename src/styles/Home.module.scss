@@ -1,0 +1,123 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.container {
+  width: 553px;
+  position: absolute;
+  top: 68px;
+  z-index: 999999;
+}
+
+.banner {
+  width: 100%;
+  height: 34vh;
+  background-color: hsl(259.34deg 84.62% 71.96%);
+}
+
+.addTodo {
+  padding: 16px;
+  border-radius: 3px;
+  background: hsl(235deg 24.49% 19.22%);
+  display: flex;
+  align-items: center;
+
+  button {
+    border-radius: 50%;
+    border: 1px solid hsl(234.78deg 19.33% 23.33%);
+    height: 27px;
+    width: 27px;
+    margin-right: 12px;
+    background: hsl(235deg 24.49% 19.22%);
+    padding: unset;
+  }
+
+  input {
+    background: hsl(235deg 24.49% 19.22%);
+    color: hsl(234.78deg 9.16% 50.78%);
+    border: unset;
+    outline: unset;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 16px;
+  }
+}
+
+.displayTodos {
+  background: hsl(235deg 24.49% 19.22%);
+  color: hsl(237.69deg 24.53% 79.22%);
+  border-radius: 4px;
+
+  p {
+    padding: 20px;
+    border-bottom: 1px solid hsl(234.78deg 19.33% 23.33%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    border-radius: 50%;
+    border: unset;
+    height: 27px;
+    width: 27px;
+    margin-right: 12px;
+    background: hsl(235deg 24.49% 19.22%);
+    text-align: center;
+    color: hsl(233.33deg 13.3% 39.8%);
+    padding: unset;
+  }
+
+  .namecont {
+    display: flex;
+    align-items: center;
+
+    .checkbox {
+      display: inline-block;
+      height: 27px;
+      width: 27px;
+      border: 1px solid hsl(234.78deg 19.33% 23.33%);
+      border-radius: 50%;
+      margin-right: 34px;
+    }
+
+    .checkbox:hover {
+      cursor: pointer;
+      border-color: hsl(259.34deg 84.62% 71.96%);
+    }
+
+    .active {
+      background: hsl(259.34deg 84.62% 71.96%);
+    }
+  }
+
+  .removeTodoButton:hover {
+    border: 1px solid hsl(233.33deg 13.3% 39.8%);
+  }
+}
+
+/* Enable hover only on non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+}
+
+@media (prefers-reduced-motion) {
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .container {
+    width: 89%;
+  }
+}
+
+/* Tablet and Smaller Desktop */
+@media (min-width: 701px) and (max-width: 1120px) {
+  .container {
+    width: 60%;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+}

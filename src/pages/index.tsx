@@ -1,11 +1,86 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import styles from "@/styles/Home.module.scss";
+import { useEffect, useRef, useState } from "react";
+import { ethers } from "ethers";
+import Contract from "./../../../todo-truffle/build/contracts/Todo.json";
 
-const inter = Inter({ subsets: ['latin'] })
+declare let window: any;
+
+export async function _getContract() {
+  if (!window.ethereum) {
+    console.log("please install MetaMask");
+    return null as any;
+  }
+
+  // Creating a new provider
+  // @ts-ignore
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+  // MetaMask requires requesting permission to connect users accounts
+  const accounts = await provider.send("eth_requestAccounts", []);
+
+  // Getting the signer
+  const signer = provider.getSigner();
+
+  // Creating a new contract factory with the signer, address and ABI
+  const contract = new ethers.Contract(
+    "0xf2F7f1E9dF8Bf650F43ecdBb5a1502C9C1df5033",
+    Contract.abi,
+    signer
+  );
+
+  // Returning the contract, provider, signer and accounts.
+  return { contract, provider, signer, accounts };
+}
 
 export default function Home() {
+  const [contract, setContract] = useState<any>(null);
+  const [todos, setTodos] = useState<Array<string>>([]);
+
+  const inputRef = useRef<any>();
+
+  useEffect(() => {
+    const loadfn = async () => {
+      const { contract } = await _getContract();
+      const todosData = await contract.getTodos();
+      setContract(contract);
+      setTodos(todosData);
+
+      contract &&
+        contract.on("TodoAdded", (data: any, txn: any, value: any) => {
+          inputRef.current.value = "";
+          if (value?.event === "TodoAdded") {
+            console.log("Added txn", txn, "data", data);
+            setTodos([...todos, ...value?.args]);
+          }
+        });
+
+      contract &&
+        contract.on("TodoRemoved", (data: any, txn: any, value: any) => {
+          if (value?.event === "TodoRemoved") {
+            console.log("Removed txn", txn, "data", data);
+            setTodos([...todos, ...value?.args]);
+          }
+        });
+    };
+    loadfn();
+  }, []);
+
+  const onClickConnect = async () => {
+    await contract.addTodo(inputRef?.current?.value);
+  };
+
+  const removeTodo = async (index: number) => {
+    await contract.removeTodoByIndex(index);
+  };
+
+  const keyDownFn = (e: any) => {
+    if (e.key === "Enter") {
+      onClickConnect();
+    }
+  };
+
   return (
     <>
       <Head>
@@ -15,109 +90,75 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
+        <div className={styles.banner}></div>
+        <div className={styles.container}>
+          <h1>TODO</h1>
+          <div className={styles.addTodo}>
+            <button onClick={onClickConnect}></button>
+            <input
+              ref={inputRef}
+              placeholder="Type in your todo..."
+              onKeyDown={keyDownFn}
             />
           </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
+          <div className="divider"></div>
+          <div className={styles.displayTodos}>
+            <Todos todos={todos} removeTodo={removeTodo} />
+          </div>
         </div>
       </main>
     </>
-  )
+  );
+}
+
+function Todos({
+  todos,
+  removeTodo,
+}: {
+  todos: Array<string>;
+  removeTodo: any;
+}) {
+  const [activeIndex, setActiveIndex] = useState<number | undefined>();
+
+  const toggleCheck = (i: number) => {
+    if (activeIndex === null || activeIndex === undefined) {
+      setActiveIndex(i);
+      return;
+    }
+
+    if (activeIndex === i) {
+      setActiveIndex(undefined);
+      return;
+    }
+
+    setActiveIndex(i);
+  };
+
+  const checkboxClassName = (i: number) => {
+    return `${styles.checkbox} ${activeIndex === i && styles.active}`;
+  };
+
+  return (
+    <>
+      {todos.filter(Boolean).map((todo, i) => (
+        <p className={styles.card} key={todo + Date.now}>
+          <div className={styles.namecont}>
+            <span
+              onClick={() => toggleCheck(i)}
+              className={checkboxClassName(i)}
+            ></span>
+            <span>{todo}</span>
+          </div>
+          {activeIndex === i && (
+            <button
+              className={styles.removeTodoButton}
+              onClick={() => removeTodo(i)}
+            >
+              X
+            </button>
+          )}
+        </p>
+      ))}
+    </>
+  );
 }
