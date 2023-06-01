@@ -4,6 +4,7 @@ import styles from "@/styles/Home.module.scss";
 import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import Contract from "./../../../todo-truffle/build/contracts/Todo.json";
+import ReactDOM from "react-dom";
 
 declare let window: any;
 
@@ -25,7 +26,7 @@ export async function _getContract() {
 
   // Creating a new contract factory with the signer, address and ABI
   const contract = new ethers.Contract(
-    "0xf2F7f1E9dF8Bf650F43ecdBb5a1502C9C1df5033",
+    "0xff584df7B4f8765A439395aFB0515A700768aa38",
     Contract.abi,
     signer
   );
@@ -72,7 +73,14 @@ export default function Home() {
   };
 
   const removeTodo = async (index: number) => {
-    await contract.removeTodoByIndex(index);
+    // await contract.removeTodoByIndex(index);
+    ReactDOM.createPortal(
+      <div className="modal">
+        <span>Hello</span>
+        <button>Close</button>
+      </div>,
+      document.body
+    );
   };
 
   const keyDownFn = (e: any) => {
@@ -92,7 +100,7 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.banner}></div>
         <div className={styles.container}>
-          <h1>TODO</h1>
+          <h1>DECENTRALIZED TODO</h1>
           <div className={styles.addTodo}>
             <button onClick={onClickConnect}></button>
             <input
